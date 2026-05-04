@@ -8,6 +8,7 @@ namespace NiumaInteract.Core.Input
     /// </summary>
     public abstract class InteractionInputSourceBase : MonoBehaviour
     {
+        [Tooltip("是否阻塞该输入源。开启后输入管线会输出空输入，并清理当前按住状态。")]
         [SerializeField] private bool isBlocked;
 
         /// <summary>

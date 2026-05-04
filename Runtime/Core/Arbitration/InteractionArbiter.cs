@@ -53,7 +53,7 @@ namespace NiumaInteract.Core.Arbitration
         public float DistanceScoreMaxDistance { get; set; } = 5f;
 
         /// <summary>
-        /// Raycast 检测来源加分。MVP 阶段暂时不会用到，但先保留评分入口。
+        /// Raycast 检测来源加分。远距离瞄准命中时，目标会获得额外评分。
         /// </summary>
         public float RaycastSourceBonus { get; set; } = 1f;
 

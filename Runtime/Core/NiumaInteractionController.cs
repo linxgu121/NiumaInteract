@@ -15,11 +15,15 @@ namespace NiumaInteract.Core
     public sealed class NiumaInteractionController : MonoBehaviour
     {
         [Header("运行状态")]
+        [Tooltip("组件启用时是否自动启动交互模块。测试场景通常开启；需要手动控制时关闭。")]
         [SerializeField] private bool runOnEnable = true;
 
         [Header("上下文")]
+        [Tooltip("交互行为的发起者，通常绑定玩家根物体。为空时默认使用当前 GameObject。")]
         [SerializeField] private GameObject actor;
+        [Tooltip("玩家视角相机。用于射线检测、准星方向或后续屏幕空间提示。为空时可自动使用 Camera.main。")]
         [SerializeField] private Camera viewCamera;
+        [Tooltip("View Camera 未绑定时，是否自动使用 Camera.main。")]
         [SerializeField] private bool useMainCameraWhenMissing = true;
 
         [Header("模块引用")]
@@ -29,19 +33,28 @@ namespace NiumaInteract.Core
         [SerializeField] private InteractionInputSourceBase inputSource;
         [Tooltip("交互门提供者，负责提供交互门实例。")]
         [SerializeField] private MonoBehaviour gateProvider;
+        [Tooltip("是否自动从当前物体和子物体查找 DetectorGroup 与 InputSource。手动精确绑定时可关闭。")]
         [SerializeField] private bool autoFindReferences = true;
 
         [Header("黑板")]
+        [Tooltip("目标丢失后延迟隐藏提示的时间，单位秒。用于避免边缘抖动导致 UI 闪烁。")]
         [SerializeField] private float targetLostDelay = 0.2f;
 
         [Header("仲裁")]
+        [Tooltip("交互成功后的触发冷却，单位秒。用于防止松手或输入缓冲导致重复触发。")]
         [SerializeField] private float triggerCooldown = 0.1f;
+        [Tooltip("目标自身优先级权重。数值越高，Priority 对焦点选择影响越大。")]
         [SerializeField] private float priorityWeight = 10f;
+        [Tooltip("玩家朝向权重。数值越高，正前方目标越容易成为焦点。")]
         [SerializeField] private float facingWeight = 3f;
+        [Tooltip("距离权重。数值越高，近距离目标越容易成为焦点。")]
         [SerializeField] private float distanceWeight = 2f;
+        [Tooltip("距离评分衰减曲线。Inverse 适合通用交互，Linear/Binary 适合更明确的距离规则。")]
         [SerializeField] private InteractionDistanceFalloffType distanceFalloffType =
             InteractionDistanceFalloffType.Inverse;
+        [Tooltip("距离评分参考最大距离。Linear 和 Binary 曲线会使用该值。")]
         [SerializeField] private float distanceScoreMaxDistance = 5f;
+        [Tooltip("Raycast 检测来源加分。后续启用射线检测时，准星命中的目标会获得额外分数。")]
         [SerializeField] private float raycastSourceBonus = 1f;
 
         private readonly InteractionBlackboard _blackboard = new InteractionBlackboard();

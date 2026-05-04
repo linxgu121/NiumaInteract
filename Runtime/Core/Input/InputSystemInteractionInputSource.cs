@@ -10,9 +10,11 @@ namespace NiumaInteract.Core.Input
     public sealed class InputSystemInteractionInputSource : InteractionInputSourceBase
     {
         [Header("输入动作")]
+        [Tooltip("交互输入动作引用。通常绑定玩家的 Interact / Use 动作，例如 E 键、手柄 A 键。")]
         [SerializeField] private InputActionReference interactAction;
 
         [Header("生命周期")]
+        [Tooltip("是否由该组件自动启用和禁用输入动作。若动作由 PlayerInput 或其他系统统一管理，则关闭。")]
         [SerializeField] private bool manageActionLifecycle = true;
 
         /// <summary>

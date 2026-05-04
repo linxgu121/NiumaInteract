@@ -12,11 +12,15 @@ namespace NiumaInteract.Core.Detection
     /// </summary>
     public sealed class SphereInteractionDetector : MonoBehaviour, IInteractionDetector
     {
+        [Tooltip("是否启用该球形检测器。关闭后不会向候选列表输出目标。")]
         [SerializeField] private bool isEnabled = true;
-        [Tooltip("只检测交互目标所在层。不要使用 Everything，避免每帧扫描大量无关 Collider。")]
+        [Tooltip("只检测交互目标所在层。不要使用 Everything,避免每帧扫描大量无关 Collider。")]
         [SerializeField] private LayerMask interactableMask;
+        [Tooltip("以 Actor 位置为中心的检测半径，单位为 Unity 世界单位。")]
         [SerializeField] private float radius = 2.5f;
+        [Tooltip("NonAlloc 检测缓冲区大小。场景内同时进入范围的 Collider 很多时需要调大。")]
         [SerializeField] private int bufferSize = 32;
+        [Tooltip("是否检测 Trigger Collider。拾取物或 NPC 范围通常使用 Collide。")]
         [SerializeField] private QueryTriggerInteraction triggerInteraction = QueryTriggerInteraction.Collide;
 
         private Collider[] _buffer;

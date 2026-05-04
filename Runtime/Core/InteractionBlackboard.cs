@@ -12,7 +12,6 @@ namespace NiumaInteract.Core
     public sealed class InteractionBlackboard
     {
         private const float CandidateFloatTolerance = 0.0001f;
-
         private readonly List<InteractionCandidate> _candidates = new List<InteractionCandidate>();
         private IInteractable _pendingLostTarget;
         private float _targetLostTimer;
