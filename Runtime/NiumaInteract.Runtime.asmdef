@@ -1,6 +1,7 @@
 {
   "name": "NiumaInteract.Runtime",
   "references": [
+    "Unity.InputSystem"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
