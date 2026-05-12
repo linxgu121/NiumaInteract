@@ -33,12 +33,24 @@ namespace NiumaInteract.Core.Detection
         [Tooltip("命中同一目标时是否合并到已有候选中。开启后 Raycast 与 Sphere 检测命中同一目标会合并 SourceMode。")]
         [SerializeField] private bool mergeWithExistingCandidate = true;
 
+        [Tooltip("射线命中缓存数量。远距离瞄准会按距离扫描多个命中点，用于跳过误放在交互层但没有交互脚本的碰撞体。")]
+        [SerializeField] private int hitBufferSize = 16;
+
+        [Tooltip("编辑器调试射线使用的相机。为空时，运行中使用最近一次检测传入的 ViewCamera，未运行时使用本组件朝向。")]
+        [SerializeField] private Camera debugViewCamera;
+
+        private RaycastHit[] _hitBuffer;
+        private Vector3 _lastRayOrigin;
+        private Vector3 _lastRayDirection;
+        private bool _hasLastRay;
+
         public bool IsEnabled => isEnabled && maxDistance > 0f;
 
         private void OnValidate()
         {
             maxDistance = maxDistance > 0f ? maxDistance : 0f;
             sphereCastRadius = sphereCastRadius > 0f ? sphereCastRadius : 0f;
+            hitBufferSize = hitBufferSize < 1 ? 1 : hitBufferSize;
         }
 
         /// <summary>
@@ -55,17 +67,9 @@ namespace NiumaInteract.Core.Detection
                 return;
 
             Ray ray = new Ray(viewCamera.transform.position, viewCamera.transform.forward);
-            if (!TryHit(ray, out var hit))
-                return;
+            CacheDebugRay(ray);
 
-            if (!IsLayerInMask(hit.collider.gameObject.layer, interactableMask))
-                return;
-
-            var interactable = hit.collider.GetComponentInParent<IInteractable>();
-            if (interactable == null || interactable.InteractionTransform == null)
-                return;
-
-            if (!interactable.CanInteract(context))
+            if (!TryFindInteractableHit(ray, context, out var interactable))
                 return;
 
             var actorTransform = context.ActorTransform;
@@ -89,32 +93,105 @@ namespace NiumaInteract.Core.Detection
             results.Add(candidate);
         }
 
-        private bool TryHit(Ray ray, out RaycastHit hit)
+        private bool TryFindInteractableHit(
+            Ray ray,
+            in InteractionContext context,
+            out IInteractable interactable)
         {
+            interactable = null;
             int mask = interactableMask.value | obstructionMask.value;
             if (mask == 0)
-            {
-                hit = default;
                 return false;
-            }
 
+            EnsureHitBuffer();
+
+            int hitCount;
             if (sphereCastRadius > 0f)
             {
-                return Physics.SphereCast(
+                hitCount = Physics.SphereCastNonAlloc(
                     ray,
                     sphereCastRadius,
-                    out hit,
+                    _hitBuffer,
+                    maxDistance,
+                    mask,
+                    triggerInteraction);
+            }
+            else
+            {
+                hitCount = Physics.RaycastNonAlloc(
+                    ray,
+                    _hitBuffer,
                     maxDistance,
                     mask,
                     triggerInteraction);
             }
 
-            return Physics.Raycast(
-                ray,
-                out hit,
-                maxDistance,
-                mask,
-                triggerInteraction);
+            if (hitCount <= 0)
+                return false;
+
+            SortHitsByDistance(hitCount);
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                var hit = _hitBuffer[i];
+                if (hit.collider == null)
+                    continue;
+
+                int layer = hit.collider.gameObject.layer;
+                bool isInteractableLayer = IsLayerInMask(layer, interactableMask);
+                bool isObstructionLayer = IsLayerInMask(layer, obstructionMask);
+
+                if (isInteractableLayer)
+                {
+                    var candidateTarget = hit.collider.GetComponentInParent<IInteractable>();
+                    if (candidateTarget != null &&
+                        candidateTarget.InteractionTransform != null &&
+                        candidateTarget.CanInteract(context))
+                    {
+                        interactable = candidateTarget;
+                        return true;
+                    }
+
+                    // 误放在交互层但没有交互脚本的碰撞体不应该挡住后方目标。
+                    if (!isObstructionLayer)
+                        continue;
+                }
+
+                if (isObstructionLayer)
+                    return false;
+            }
+
+            return false;
+        }
+
+        private void EnsureHitBuffer()
+        {
+            if (_hitBuffer == null || _hitBuffer.Length != hitBufferSize)
+                _hitBuffer = new RaycastHit[hitBufferSize];
+        }
+
+        private void SortHitsByDistance(int hitCount)
+        {
+            for (int i = 1; i < hitCount; i++)
+            {
+                RaycastHit current = _hitBuffer[i];
+                int insertIndex = i - 1;
+
+                while (insertIndex >= 0 && _hitBuffer[insertIndex].distance > current.distance)
+                {
+                    _hitBuffer[insertIndex + 1] = _hitBuffer[insertIndex];
+                    insertIndex--;
+                }
+
+                _hitBuffer[insertIndex + 1] = current;
+            }
+        }
+
+        private void CacheDebugRay(Ray ray)
+        {
+            _lastRayOrigin = ray.origin;
+            _lastRayDirection = ray.direction;
+            _hasLastRay = true;
         }
 
         private static bool TryMergeCandidate(
@@ -148,13 +225,32 @@ namespace NiumaInteract.Core.Detection
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = new Color(1f, 0.78f, 0.2f, 0.45f);
-            var origin = transform.position;
-            var direction = transform.forward;
+            GetDebugRay(out var origin, out var direction);
 
             Gizmos.DrawLine(origin, origin + direction * maxDistance);
 
             if (sphereCastRadius > 0f)
                 Gizmos.DrawWireSphere(origin + direction * maxDistance, sphereCastRadius);
+        }
+
+        private void GetDebugRay(out Vector3 origin, out Vector3 direction)
+        {
+            if (debugViewCamera != null)
+            {
+                origin = debugViewCamera.transform.position;
+                direction = debugViewCamera.transform.forward;
+                return;
+            }
+
+            if (Application.isPlaying && _hasLastRay)
+            {
+                origin = _lastRayOrigin;
+                direction = _lastRayDirection;
+                return;
+            }
+
+            origin = transform.position;
+            direction = transform.forward;
         }
 #endif
     }

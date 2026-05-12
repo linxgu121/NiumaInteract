@@ -49,6 +49,12 @@ namespace NiumaInteract.Core
         public bool HasLastResult { get; private set; }
 
         /// <summary>
+        /// 交互结果版本号。
+        /// 每发布一次真实交互结果都会递增，方便外部桥接层数据驱动读取，避免依赖事件订阅。
+        /// </summary>
+        public int ResultRevision { get; private set; }
+
+        /// <summary>
         /// 目标丢失延迟，避免准星或范围边界抖动导致 UI 提示闪烁。
         /// </summary>
         public float TargetLostDelay { get; set; } = 0.2f;
@@ -169,6 +175,7 @@ namespace NiumaInteract.Core
         {
             LastResult = result;
             HasLastResult = true;
+            BumpResultRevision();
             OnInteractionResult?.Invoke(LastResult);
         }
 
@@ -245,6 +252,17 @@ namespace NiumaInteract.Core
         private static bool Approximately(float a, float b)
         {
             return Math.Abs(a - b) <= CandidateFloatTolerance;
+        }
+
+        private void BumpResultRevision()
+        {
+            if (ResultRevision == int.MaxValue)
+            {
+                ResultRevision = 1;
+                return;
+            }
+
+            ResultRevision++;
         }
     }
 }
