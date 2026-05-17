@@ -120,6 +120,13 @@ namespace NiumaInteract.Core.Bridge
             if (!hideOnSuccess || !result.Succeeded)
                 return;
 
+            if (result.Target is IInteractionPromptPolicy promptPolicy && !promptPolicy.SuppressPromptAfterSuccess)
+            {
+                _suppressedTarget = null;
+                RefreshPrompt();
+                return;
+            }
+
             _suppressedTarget = result.Target;
             HidePrompt();
         }
