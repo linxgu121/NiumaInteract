@@ -133,7 +133,7 @@ namespace NiumaInteract.Core.Bridge
 
         private void RefreshPrompt()
         {
-            if (_promptSink == null || controller == null)
+            if (_promptSink == null || promptSinkProvider == null || controller == null)
                 return;
 
             var target = controller.Blackboard.CurrentTarget;
@@ -161,7 +161,8 @@ namespace NiumaInteract.Core.Bridge
 
         private void HidePrompt()
         {
-            _promptSink?.HidePrompt();
+            if (promptSinkProvider != null)
+                _promptSink?.HidePrompt();
         }
 
         private static float CalculateHoldProgress(IInteractable target, float holdTime)
