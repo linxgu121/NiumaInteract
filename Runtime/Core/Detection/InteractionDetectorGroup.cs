@@ -10,7 +10,7 @@ namespace NiumaInteract.Core.Detection
     /// </summary>
     public sealed class InteractionDetectorGroup : MonoBehaviour
     {
-        [Tooltip("手动指定的检测器组件列表。数组元素必须是实现 IInteractionDetector 的 MonoBehaviour，例如 SphereInteractionDetector。")]
+        [Tooltip("手动指定的检测器脚本列表。近距离交互拖 SphereInteractionDetector；远距离瞄准拖 RaycastInteractionDetector；需要两种检测时两个都拖。")]
         [SerializeField] private MonoBehaviour[] detectorProviders;
         [Tooltip("如果没有手动指定检测器，则自动查找所有子物体上的 IInteractionDetector 组件并添加到检测器列表中。")]
         [SerializeField] private bool autoFindChildDetectors = true;
@@ -74,7 +74,7 @@ namespace NiumaInteract.Core.Detection
 
         /// <summary>
         /// 如果启用了自动查找选项但没有手动指定检测器
-        /// 则在子物体中查找所有实现了 IInteractionDetector 的 MonoBehaviour 组件并添加到检测器列表中。
+        /// 则在子物体中查找 SphereInteractionDetector、RaycastInteractionDetector 等检测器脚本并添加到检测器列表中。
         /// </summary>
         private void AutoFindDetectorsIfNeeded()
         {

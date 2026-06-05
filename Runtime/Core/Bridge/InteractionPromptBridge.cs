@@ -12,7 +12,7 @@ namespace NiumaInteract.Core.Bridge
     {
         [Tooltip("交互模块根控制器。用于读取黑板中的当前目标、按住时间和交互结果。")]
         [SerializeField] private NiumaInteractionController controller;
-        [Tooltip("交互提示 UI 输出端。需要拖入实现 IInteractionPromptSink 的组件，例如 SimpleInteractionPromptSink。")]
+        [Tooltip("交互提示 UI 输出脚本。简单提示拖 SimpleInteractionPromptSink；正式 UI 拖团队制作的 InteractionPrompt 脚本。")]
         [SerializeField] private MonoBehaviour promptSinkProvider;
         [Tooltip("未手动绑定 Controller 时，是否自动在场景中查找 NiumaInteractionController。")]
         [SerializeField] private bool autoFindController = true;

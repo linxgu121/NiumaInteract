@@ -18,7 +18,7 @@ NiumaInteract 是通用交互模块，负责检测可交互目标、输入快照
 6. 输入满足条件后调用目标 Interact。
 
 ## 模块用法
-- 可交互物体实现 IInteractable 或挂接现有交互组件。
+- 可交互物体优先挂现有交互脚本：拾取物挂 `InventoryPickupInteractable`，测试拾取物挂 `PickupInteractable`，对话 NPC 挂 `NiumaDialogueInteractable`，商店入口挂 `ShopInteractable`，合成台挂 `CraftStationInteractable`。只有这些组件覆盖不了需求时，再由程序新增自定义交互脚本。
 - 目标必须提供稳定 Transform/Anchor 供检测与提示定位。
 - 长按进度由 UI 用 HoldTime / CurrentTarget.LongPressDuration 计算。
 
