@@ -39,4 +39,39 @@ NiumaInteract 是通用交互模块，负责检测可交互目标、输入快照
 ## 协作边界
 Interact 不负责背包入库、商店交易、对话播放等具体业务。拾取物、NPC、商店入口通过自己的 Interactable 组件把交互转发到对应模块。
 
+## 场景挂载与 Inspector 配置
+### NiumaInteractionController
+建议挂载位置：`PlayerRoot/InteractionRoot`。
+
+用途：统一处理玩家附近/远距离交互检测、焦点仲裁、短按/长按输入和提示输出。
+
+| 字段 | 怎么填 | 可否留空 | 不填会怎样 |
+| --- | --- | --- | --- |
+| `Input Source Provider` | 拖交互输入脚本 | 不可以 | 没有输入，无法触发交互 |
+| `Detector Providers` | 拖范围检测、射线检测等检测器 | 不可以 | 找不到可交互目标 |
+| `Prompt Sink Provider` | 拖 UI 提示接收脚本，例如 `SimpleInteractionPromptSink` | 可以 | 交互仍可用，但没有提示 UI |
+| `Gate Provider` | 剧情/菜单阻塞交互时拖 Gate 脚本 | 可以 | 留空时默认不阻塞交互 |
+| `Auto Tick` | 没有统一模块启动器时开启 | 按项目决定 | 外部已 Tick 时再开启会重复检测 |
+
+### SphereInteractionDetector / RaycastInteractionDetector
+建议挂载位置：`PlayerRoot/InteractionRoot/Detectors`。
+
+| 字段 | 怎么填 | 可否留空 | 不填会怎样 |
+| --- | --- | --- | --- |
+| `Origin Transform` | 拖玩家或相机 Transform | 不建议 | 自动使用当前物体，检测位置可能不准 |
+| `Layer Mask` | 只勾交互物层 | 不可以 | 默认全层会检测地形/玩家/特效，性能和结果都不稳定 |
+| `Radius / Distance` | 按交互距离填写 | 不可以 | 太小检测不到，太大误选远处物体 |
+| `View Camera` | 射线检测拖玩家相机 | 射线检测不建议留空 | 为空时射线方向可能不符合视角 |
+
+### 可交互物脚本
+建议挂载位置：NPC、拾取物、商店入口、机关物体。
+
+| 字段 | 怎么填 | 可否留空 | 不填会怎样 |
+| --- | --- | --- | --- |
+| `Interaction Id` | 填稳定 ID，例如 `herb_001`、`npc_blacksmith` | 不建议 | 任务/存档/调试难以追踪 |
+| `Display Name` | 填 UI 提示名称 | 可以 | UI 可能显示默认名或空 |
+| `Prompt Anchor` | 拖提示锚点 Transform | 可以 | 留空时使用物体自身位置 |
+| `Interact Kind` | 按需求选短按/长按 | 不可以 | 配错会导致提示和输入不一致 |
+| `Priority` | 常用目标设高一点 | 可以 | 默认优先级可能被其它目标抢焦点 |
+
 
