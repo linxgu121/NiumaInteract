@@ -12,7 +12,7 @@ namespace NiumaInteract.Core.Bridge
     {
         [Tooltip("交互模块根控制器。用于读取黑板中的当前目标、按住时间和交互结果。")]
         [SerializeField] private NiumaInteractionController controller;
-        [Tooltip("交互提示 UI 输出脚本。简单提示拖 SimpleInteractionPromptSink；正式 UI 拖团队制作的 InteractionPrompt 脚本。")]
+        [Tooltip("交互提示 UI 输出脚本。UGUI 临时提示拖 SimpleInteractionPromptSink；UI Toolkit 提示拖 InteractionPromptToolkitSink；正式项目也可以拖团队自定义实现 IInteractionPromptSink 的脚本。")]
         [SerializeField] private MonoBehaviour promptSinkProvider;
         [Tooltip("未手动绑定 Controller 时，是否自动在场景中查找 NiumaInteractionController。")]
         [SerializeField] private bool autoFindController = true;
@@ -61,7 +61,7 @@ namespace NiumaInteract.Core.Bridge
         private void ResolveReferences()
         {
             if (controller == null && autoFindController)
-                controller = FindObjectOfType<NiumaInteractionController>();
+                controller = FindSceneObject<NiumaInteractionController>();
 
             _promptSink = promptSinkProvider as IInteractionPromptSink;
 
@@ -71,6 +71,15 @@ namespace NiumaInteract.Core.Bridge
                     $"{nameof(InteractionPromptBridge)} 的 Prompt Sink Provider 没有实现 {nameof(IInteractionPromptSink)}。",
                     this);
             }
+        }
+
+        private static T FindSceneObject<T>() where T : Object
+        {
+#if UNITY_2023_1_OR_NEWER
+            return FindFirstObjectByType<T>();
+#else
+            return FindObjectOfType<T>();
+#endif
         }
 
         private void Bind()

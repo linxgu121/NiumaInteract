@@ -1,0 +1,17 @@
+{
+  "name": "NiumaInteract.ToolkitBridge",
+  "references": [
+    "NiumaInteract.Runtime",
+    "NiumaUI.Runtime",
+    "Unity.TextMeshPro",
+    "Unity.ugui"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": []
+}
