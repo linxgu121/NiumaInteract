@@ -118,3 +118,13 @@ CoreScene
 - `ProgressFill`：自定义进度填充 VisualElement，可留空。
 
 
+
+## 配置资产粒度基准
+
+NiumaInteract 当前不建议制作全局业务内容资产。交互点优先作为场景实例配置。
+
+- NPC、门、采集点、传送点等交互对象，通常在场景 GameObject 上挂交互脚本并填写行为类型、TargetId、提示文本。
+- 如果交互会启动对话，TargetId 填 `DialogueAsset.DialogueId`。
+- 如果交互会接任务或推进任务，TargetId / SignalId 应引用 Quest 模块里的稳定 ID。
+
+后期如果交互规则大量复用，再考虑新增“交互模板资产”；第一版不要为了所有交互做一个巨大全局表。
